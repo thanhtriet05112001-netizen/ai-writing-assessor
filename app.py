@@ -3,16 +3,13 @@ import streamlit as st
 from google import genai
 import re
 
-# 1. Automatically load the API key into the OS environment for the SDK
-if "GEMINI_API_KEY" in st.secrets:
-    os.environ["GEMINI_API_KEY"] = st.secrets["GEMINI_API_KEY"]
-elif "GOOGLE_API_KEY" in st.secrets:
-    os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
+# 1. Safely grab the API key from Streamlit secrets
+api_key = st.secrets.get("GEMINI_API_KEY") or st.secrets.get("GOOGLE_API_KEY")
 
-# Initialize the modern client (it automatically detects the environment variable)
-client = genai.Client()
+# 2. Initialize the client, explicitly disabling Vertex AI to force Developer API key usage
+client = genai.Client(api_key=api_key)
 
-# 2. Pure Python Metrics Calculator
+# 3. Pure Python Metrics Calculator
 def calculate_metrics(text):
     words = re.findall(r'\b\w+\b', text.lower())
     word_count = len(words)
@@ -25,7 +22,7 @@ def calculate_metrics(text):
     
     return word_count, sentence_count, lexical_diversity
 
-# 3. Define AI feedback function using the client
+# 4. Define AI feedback function
 def get_ai_feedback(text):
     prompt = f"""
     You are an expert English language assessor. Review the following student text.
@@ -42,7 +39,7 @@ def get_ai_feedback(text):
     )
     return response.text
 
-# 4. Build the user interface
+# 5. Build the user interface
 st.set_page_config(page_title="AI Writing Assessor", layout="wide")
 st.title("📝 AI Writing Assessor")
 st.markdown("Analyze student writing for linguistic metrics and get AI-powered feedback.")
