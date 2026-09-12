@@ -1,15 +1,15 @@
-import os
 import streamlit as st
-from google import genai
+from openai import OpenAI
 import re
 
-# 1. Safely grab the API key from Streamlit secrets
-api_key = st.secrets.get("GEMINI_API_KEY") or st.secrets.get("GOOGLE_API_KEY")
+# 1. Configure the OpenRouter client securely
+api_key = st.secrets.get("OPENROUTER_API_KEY")
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=api_key,
+)
 
-# 2. Initialize the client, explicitly disabling Vertex AI to force Developer API key usage
-client = genai.Client(api_key=api_key)
-
-# 3. Pure Python Metrics Calculator
+# 2. Pure Python Metrics Calculator
 def calculate_metrics(text):
     words = re.findall(r'\b\w+\b', text.lower())
     word_count = len(words)
@@ -22,7 +22,7 @@ def calculate_metrics(text):
     
     return word_count, sentence_count, lexical_diversity
 
-# 4. Define AI feedback function
+# 3. Define AI feedback function via OpenRouter
 def get_ai_feedback(text):
     prompt = f"""
     You are an expert English language assessor. Review the following student text.
@@ -33,13 +33,13 @@ def get_ai_feedback(text):
     Student Text:
     {text}
     """
-    response = client.models.generate_content(
-        model='gemini-2.5-flash',
-        contents=prompt,
+    response = client.chat.completions.create(
+        model="openai/gpt-4o-mini",  # You can change this to any model available on OpenRouter
+        messages=[{"role": "user", "content": prompt}]
     )
-    return response.text
+    return response.choices[0].message.content
 
-# 5. Build the user interface
+# 4. Build the user interface
 st.set_page_config(page_title="AI Writing Assessor", layout="wide")
 st.title("📝 AI Writing Assessor")
 st.markdown("Analyze student writing for linguistic metrics and get AI-powered feedback.")
