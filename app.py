@@ -1,10 +1,16 @@
+import os
 import streamlit as st
 from google import genai
 import re
 
-# 1. Configure the modern Gemini client securely
-API_KEY = st.secrets["GEMINI_API_KEY"]
-client = genai.Client(api_key=API_KEY)
+# 1. Automatically load the API key into the OS environment for the SDK
+if "GEMINI_API_KEY" in st.secrets:
+    os.environ["GEMINI_API_KEY"] = st.secrets["GEMINI_API_KEY"]
+elif "GOOGLE_API_KEY" in st.secrets:
+    os.environ["GOOGLE_API_KEY"] = st.secrets["GOOGLE_API_KEY"]
+
+# Initialize the modern client (it automatically detects the environment variable)
+client = genai.Client()
 
 # 2. Pure Python Metrics Calculator
 def calculate_metrics(text):
@@ -19,7 +25,7 @@ def calculate_metrics(text):
     
     return word_count, sentence_count, lexical_diversity
 
-# 3. Define AI feedback function using the new client
+# 3. Define AI feedback function using the client
 def get_ai_feedback(text):
     prompt = f"""
     You are an expert English language assessor. Review the following student text.
