@@ -1,4 +1,4 @@
-API_KEY = st.secrets["AQ.Ab8RN6KtXviRPSwnqKVSy2Rw5-isNT60dZOyO4uz8Vvs5V-WHw"]
+API_KEY = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=API_KEY)
 import subprocess
 
