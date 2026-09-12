@@ -8,14 +8,10 @@ API_KEY = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel('gemini-3.6-flash')
 
-# 2. Safely load or download spaCy
+# 2. Load spaCy securely
 @st.cache_resource
 def load_spacy():
-    try:
-        return spacy.load("en_core_web_sm")
-    except OSError:
-        subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
-        return spacy.load("en_core_web_sm")
+    return spacy.load("en_core_web_sm")
 
 nlp = load_spacy()
 
