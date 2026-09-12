@@ -1,29 +1,25 @@
 import streamlit as st
-import google.generativeai as genai
+from google import genai
 import re
 
-# 1. Configure the AI Model securely
+# 1. Configure the modern Gemini client securely
 API_KEY = st.secrets["GEMINI_API_KEY"]
-genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel('gemini-3.6-flash')
+client = genai.Client(api_key=API_KEY)
 
-# 2. Pure Python Metrics Calculator (No spaCy/server downloads needed)
+# 2. Pure Python Metrics Calculator
 def calculate_metrics(text):
-    # Simple tokenization splitting by whitespace and stripping punctuation
     words = re.findall(r'\b\w+\b', text.lower())
     word_count = len(words)
     
-    # Estimate sentences using common punctuation marks
     sentences = [s for s in re.split(r'[.!?]+', text) if s.strip()]
     sentence_count = len(sentences) if sentences else 1
     
-    # Calculate Lexical Diversity (Type-Token Ratio)
     unique_words = set(words)
     lexical_diversity = len(unique_words) / word_count if word_count > 0 else 0
     
     return word_count, sentence_count, lexical_diversity
 
-# 3. Define AI feedback function
+# 3. Define AI feedback function using the new client
 def get_ai_feedback(text):
     prompt = f"""
     You are an expert English language assessor. Review the following student text.
@@ -34,7 +30,10 @@ def get_ai_feedback(text):
     Student Text:
     {text}
     """
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model='gemini-2.5-flash',
+        contents=prompt,
+    )
     return response.text
 
 # 4. Build the user interface
