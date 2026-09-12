@@ -1,17 +1,21 @@
 import streamlit as st
 import spacy
+import spacy.cli
 import google.generativeai as genai
-import subprocess
 
 # 1. Configure the AI Model securely
 API_KEY = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel('gemini-3.6-flash')
 
-# 2. Load spaCy securely
+# 2. Force download via spaCy's native CLI if missing
 @st.cache_resource
 def load_spacy():
-    return spacy.load("en_core_web_sm")
+    try:
+        return spacy.load("en_core_web_sm")
+    except OSError:
+        spacy.cli.download("en_core_web_sm")
+        return spacy.load("en_core_web_sm")
 
 nlp = load_spacy()
 
