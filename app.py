@@ -2,12 +2,12 @@ import streamlit as st
 import spacy
 import google.generativeai as genai
 
-# Configure the AI Model securely
+# 1. Configure the AI Model securely
 API_KEY = st.secrets["GEMINI_API_KEY"]
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel('gemini-3.6-flash')
 
-# Load spaCy
+# 2. Load spaCy (Model is pre-installed via requirements.txt)
 @st.cache_resource
 def load_spacy():
     return spacy.load("en_core_web_sm")
